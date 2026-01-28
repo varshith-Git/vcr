@@ -23,7 +23,7 @@
 //! - Using SIMD, io_uring, or parallelism
 
 #![deny(unsafe_op_in_unsafe_fn)]
-#![warn(missing_docs)]
+#![allow(missing_docs)]
 
 pub mod change;
 pub mod io;

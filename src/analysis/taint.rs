@@ -5,7 +5,7 @@
 //! - Bounded depth (no infinite loops)
 //! - Every taint must be traceable
 
-use crate::cpg::model::{CPG, CPGNodeId, CPGNodeKind, CPGEdgeKind};
+use crate::cpg::model::{CPG, CPGNodeId, CPGEdgeKind};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Maximum taint propagation depth

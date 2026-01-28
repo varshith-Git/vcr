@@ -15,7 +15,7 @@ pub type QueryResult = Vec<CPGNodeId>;
 /// Scheduler for parallel execution
 pub struct Scheduler {
     /// Thread pool size
-    thread_count: usize,
+    _thread_count: usize,
 }
 
 impl Scheduler {

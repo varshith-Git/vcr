@@ -14,7 +14,7 @@
 //!
 //! This is **correct but incomplete** > fast and wrong
 
-use crate::cpg::model::{CPG, CPGNodeId, CPGNodeKind, CPGEdgeKind};
+use crate::cpg::model::{CPG, CPGNodeKind, CPGEdgeKind};
 use crate::semantic::model::ValueId;
 use std::collections::{HashMap, HashSet};
 

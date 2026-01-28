@@ -2,9 +2,9 @@
 //!
 //! **Goal**: Prove VTR survives real-world failure
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::io::{Result, Error, ErrorKind};
-use crate::storage::{SnapshotMetadata, SnapshotId};
+use crate::storage::SnapshotId;
 
 /// Recovery state
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,7 +21,7 @@ pub enum RecoveryState {
 
 /// Recovery manager
 pub struct RecoveryManager {
-    snapshot_dir: PathBuf,
+    _snapshot_dir: PathBuf,
 }
 
 impl RecoveryManager {

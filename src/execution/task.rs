@@ -3,7 +3,7 @@
 //! Tasks are independent work units that can execute in parallel
 
 use crate::cpg::model::CPGNodeId;
-use crate::query::primitives::QueryPrimitives;
+
 
 /// Unique task identifier
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]

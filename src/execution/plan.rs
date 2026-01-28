@@ -2,7 +2,7 @@
 //!
 //! **Critical**: Results merged in deterministic order
 
-use crate::execution::task::{Task, TaskId};
+use crate::execution::task::Task;
 
 /// Deterministic ordering for commit
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

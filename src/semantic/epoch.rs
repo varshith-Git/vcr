@@ -17,7 +17,7 @@
 //! - Semantic facts are immutable within epoch
 //! - Incremental updates create new epoch
 
-use crate::memory::epoch::{IngestionEpoch, ParseEpoch};
+use crate::memory::epoch::ParseEpoch;
 use crate::semantic::invalidation::InvalidationTracker;
 use crate::semantic::model::{CFG, DFG};
 use crate::semantic::symbols::SymbolTable;
