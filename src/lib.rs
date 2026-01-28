@@ -35,6 +35,7 @@ pub mod semantic;  // Phase 2
 pub mod cpg;  // Phase 3
 pub mod analysis;  // Phase 3
 pub mod query;  // Phase 3
+pub mod execution;  // Phase 4
 pub mod types;
 
 // Re-export public API
