@@ -35,10 +35,12 @@ impl CPGIndices {
     }
 
     /// Build indices from CPG
+    ///
+    /// **All indices are derived and deterministic**
     pub fn build(cpg: &CPG) -> Self {
         let mut indices = Self::new();
 
-        // Build node_edges index
+        // Build node_edges index (outgoing edges by kind)
         for edge in &cpg.edges {
             indices
                 .node_edges
@@ -49,7 +51,52 @@ impl CPGIndices {
                 .push(edge.id);
         }
 
-        // TODO: Build other indices in Step 3.3
+        // Build symbol_to_defs (Symbol nodes defining symbols)
+        for node in &cpg.nodes {
+            if node.kind == CPGNodeKind::Symbol {
+                if let OriginRef::Symbol { symbol_id } = node.origin {
+                    indices
+                        .symbol_to_defs
+                        .entry(symbol_id)
+                        .or_insert_with(Vec::new)
+                        .push(node.id);
+                }
+            }
+        }
+
+        // Build var_to_uses (DFG values and their uses)
+        for node in &cpg.nodes {
+            if node.kind == CPGNodeKind::DfgValue {
+                if let OriginRef::Dfg { value_id } = node.origin {
+                    // Find all edges pointing to this value (uses)
+                    for edge in &cpg.edges {
+                        if edge.to == node.id && edge.kind == CPGEdgeKind::DataFlow {
+                            indices
+                                .var_to_uses
+                                .entry(value_id)
+                                .or_insert_with(Vec::new)
+                                .push(edge.from);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build func_to_calls (Function nodes and their call sites)
+        for edge in &cpg.edges {
+            if edge.kind == CPGEdgeKind::Calls {
+                // Get the target function node
+                if let Some(target_node) = cpg.get_node(edge.to) {
+                    if let OriginRef::Function { function_id } = target_node.origin {
+                        indices
+                            .func_to_calls
+                            .entry(function_id)
+                            .or_insert_with(Vec::new)
+                            .push(edge.from);
+                    }
+                }
+            }
+        }
 
         indices
     }
@@ -65,6 +112,7 @@ impl CPGIndices {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::ByteRange;
 
     #[test]
     fn test_cpg_indices_creation() {
@@ -73,10 +121,67 @@ mod tests {
     }
 
     #[test]
-    fn test_cpg_indices_build() {
+    fn test_cpg_indices_build_empty() {
         let cpg = CPG::new();
         let indices = CPGIndices::build(&cpg);
         
         assert_eq!(indices.node_edges.len(), 0);
+        assert_eq!(indices.symbol_to_defs.len(), 0);
+        assert_eq!(indices.var_to_uses.len(), 0);
+        assert_eq!(indices.func_to_calls.len(), 0);
+    }
+
+    #[test]
+    fn test_cpg_indices_node_edges() {
+        let mut cpg = CPG::new();
+        
+        // Add nodes
+        cpg.add_node(CPGNode::new(
+            CPGNodeId(1),
+            CPGNodeKind::Function,
+            OriginRef::Function { function_id: FunctionId(1) },
+            ByteRange::new(0, 10),
+        ));
+        
+        cpg.add_node(CPGNode::new(
+            CPGNodeId(2),
+            CPGNodeKind::CfgNode,
+            OriginRef::Cfg { node_id: crate::semantic::model::NodeId(1) },
+            ByteRange::new(0, 10),
+        ));
+        
+        // Add edge
+        cpg.add_edge(CPGEdge::new(
+            CPGEdgeId(1),
+            CPGEdgeKind::ControlFlow,
+            CPGNodeId(1),
+            CPGNodeId(2),
+        ));
+        
+        let indices = CPGIndices::build(&cpg);
+        
+        // Check node_edges index
+        let edges = indices.get_edges_from(CPGNodeId(1), CPGEdgeKind::ControlFlow);
+        assert!(edges.is_some());
+        assert_eq!(edges.unwrap().len(), 1);
+    }
+
+    #[test]
+    fn test_cpg_indices_determinism() {
+        let mut cpg = CPG::new();
+        
+        cpg.add_node(CPGNode::new(
+            CPGNodeId(1),
+            CPGNodeKind::Symbol,
+            OriginRef::Symbol { symbol_id: crate::semantic::model::SymbolId(42) },
+            ByteRange::new(0, 10),
+        ));
+        
+        // Build twice
+        let indices1 = CPGIndices::build(&cpg);
+        let indices2 = CPGIndices::build(&cpg);
+        
+        assert_eq!(indices1.symbol_to_defs.len(), indices2.symbol_to_defs.len());
     }
 }
+
