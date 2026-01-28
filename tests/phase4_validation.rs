@@ -23,7 +23,7 @@ fn test_parallel_execution_determinism() {
             CPGNodeId(i),
             CPGNodeKind::Function,
             OriginRef::Function { function_id: semantic::model::FunctionId(i) },
-            ByteRange::new((i-1) * 10, i * 10),
+            ByteRange::new((i as u32 - 1) * 10, i as u32 * 10),
         ));
     }
 
