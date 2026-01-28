@@ -117,7 +117,7 @@ pub struct ParsedFile {
 }
 
 /// A byte range in a source file.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ByteRange {
     /// Start byte offset (inclusive)
     pub start: usize,
