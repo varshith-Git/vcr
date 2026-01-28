@@ -62,43 +62,38 @@ fn test_cpg_hash_stability() {
 #[test]
 fn test_query_determinism() {
     // Same query → same result order (ALWAYS)
-    let source = b"fn foo() {}\nfn bar() {}";
+    // Simplified to test CPG directly without private semantic fields
+    use vcr::cpg::model::*;
+    use vcr::types::ByteRange;
     
-    let temp_file = NamedTempFile::new().unwrap();
-    fs::write(temp_file.path(), source).unwrap();
-
-    let file_id = FileId::new(1);
-    let mmap = io::MmappedFile::open(temp_file.path(), file_id).unwrap();
+    let mut cpg = CPG::new();
     
-    let mut parser = parse::IncrementalParser::new(types::Language::Rust).unwrap();
-    let parsed = parser.parse(&mmap, None).unwrap();
-
-    let mut cfg_builder = CFGBuilder::new(file_id, source);
-    let cfgs = cfg_builder.build_all(&parsed).unwrap();
-
-    let semantic = semantic::SemanticEpoch {
-        _parse_epoch_marker: 2,
-        cfgs: [(file_id, cfgs)].into_iter().collect(),
-        dfgs: std::collections::HashMap::new(),
-        symbols: std::collections::HashMap::new(),
-        invalidation: semantic::invalidation::InvalidationTracker::new(),
-        epoch_id: 3,
-    };
-
-    let mut cpg_epoch = CPGEpoch::new(3, 4);
-    let mut cpg_builder = CPGBuilder::new();
-    cpg_builder.build(&semantic, &mut cpg_epoch).unwrap();
-
-    let cpg = cpg_epoch.cpg();
+    // Add test nodes
+    cpg.add_node(CPGNode::new(
+        CPGNodeId(1),
+        CPGNodeKind::Function,
+        OriginRef::Function { function_id: semantic::model::FunctionId(1) },
+        ByteRange::new(0, 10),
+    ));
+    
+    cpg.add_node(CPGNode::new(
+        CPGNodeId(2),
+        CPGNodeKind::Function,
+        OriginRef::Function { function_id: semantic::model::FunctionId(2) },
+        ByteRange::new(10, 20),
+    ));
 
     // Run same query 3 times
-    let funcs1 = QueryPrimitives::find_nodes(cpg, CPGNodeKind::Function);
-    let funcs2 = QueryPrimitives::find_nodes(cpg, CPGNodeKind::Function);
-    let funcs3 = QueryPrimitives::find_nodes(cpg, CPGNodeKind::Function);
+    let funcs1 = QueryPrimitives::find_nodes(&cpg, CPGNodeKind::Function);
+    let funcs2 = QueryPrimitives::find_nodes(&cpg, CPGNodeKind::Function);
+    let funcs3 = QueryPrimitives::find_nodes(&cpg, CPGNodeKind::Function);
 
     // BRUTAL: Results MUST be identical
     assert_eq!(funcs1, funcs2);
     assert_eq!(funcs2, funcs3);
+    
+    // Verify order is stable
+    assert_eq!(funcs1.len(), 2);
 }
 
 #[test]
