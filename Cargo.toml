@@ -1,0 +1,36 @@
+[package]
+name = "vcr"
+version = "0.1.0"
+edition = "2021"
+authors = ["Valori Team"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# Incremental parsing
+tree-sitter = "0.20"
+tree-sitter-rust = "0.20"
+
+# Memory-mapped I/O
+memmap2 = "0.9"
+
+# Epoch-based memory reclamation
+crossbeam-epoch = "0.9"
+
+# Directory traversal
+walkdir = "2.4"
+
+# Hashing for determinism
+sha2 = "0.10"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3.8"
+
