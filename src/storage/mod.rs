@@ -119,7 +119,7 @@ mod tests {
         
         // Load (placeholder returns empty CPG)
         let loaded = CPGSnapshot::load(temp.path()).unwrap();
-        assert_eq!(loaded.nodes().len(), 0);  // Placeholder behavior
+        assert_eq!(loaded.nodes.len(), 0);  // Placeholder behavior
     }
 
     #[test]
