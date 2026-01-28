@@ -5,8 +5,15 @@
 //! Hot path: Incremental edits, queries (unchanged from Phase 1)
 //! Cold path: Large repo ingestion (new, optional acceleration)
 
+// Existing Phase 1 I/O (unchanged)
+pub mod source_file;
+
+// Path B1: New I/O abstraction
 pub mod hot;
 pub mod cold;
+
+// Phase 1 exports (unchanged)
+pub use source_file::{MmappedFile, SourceFile};
 
 use std::path::Path;
 use std::io::Result;
