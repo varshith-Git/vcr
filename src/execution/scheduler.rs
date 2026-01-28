@@ -43,19 +43,32 @@ impl Scheduler {
 
     /// Execute a single stage
     fn execute_stage(&self, stage: &crate::execution::plan::Stage, cpg: &CPG) -> Vec<QueryResult> {
-        let task_count = stage.parallel_tasks.len();
-        
         // Result storage (one slot per task)
         let results: Arc<Mutex<HashMap<usize, QueryResult>>> = Arc::new(Mutex::new(HashMap::new()));
         
-        // For now, execute serially (parallel execution with rayon would go here)
-        // This is the **correct** serial baseline for validation
-        for task in &stage.parallel_tasks {
-            let result = self.execute_task(task, cpg);
-            results.lock().unwrap().insert(task.result_slot, result);
+        #[cfg(feature = "parallel-execution")]
+        {
+            // Parallel execution with Rayon (feature-flagged)
+            use rayon::prelude::*;
+            
+            stage.parallel_tasks
+                .par_iter()
+                .for_each(|task| {
+                    let result = self.execute_task(task, cpg);
+                    results.lock().unwrap().insert(task.result_slot, result);
+                });
         }
         
-        // Commit in deterministic order
+        #[cfg(not(feature = "parallel-execution"))]
+        {
+            // Serial execution (default baseline)
+            for task in &stage.parallel_tasks {
+                let result = self.execute_task(task, cpg);
+                results.lock().unwrap().insert(task.result_slot, result);
+            }
+        }
+        
+        // Commit in deterministic order (always serial)
         let tasks_ordered = stage.tasks_in_commit_order();
         let results_lock = results.lock().unwrap();
         

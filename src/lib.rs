@@ -42,6 +42,7 @@ pub mod storage;  // Phase 4
 pub mod api;  // Phase 4
 pub mod types;
 pub mod recovery;  // Path B3
+pub mod config;  // Path B6
 
 // Re-export public API
 pub use types::{FileId, ParsedFile, RepoSnapshot};
