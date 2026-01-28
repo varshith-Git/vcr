@@ -147,7 +147,7 @@ fn cmd_ingest(path: PathBuf, config: Option<PathBuf>) -> Result<String, String> 
         let hash = cpg.compute_hash();
         
         Ok(format!("{{\"status\":\"success\",\"epoch_id\":1,\"cpg_hash\":\"{}\",\"nodes\":{}}}", 
-            hash, parsed.root_node().child_count()))
+            hash, parsed.tree.root_node().child_count()))
     } else {
         Err("Directory ingestion not yet implemented - TODO".to_string())
     }
@@ -156,16 +156,15 @@ fn cmd_ingest(path: PathBuf, config: Option<PathBuf>) -> Result<String, String> 
 fn cmd_snapshot_save() -> Result<String, String> {
     use vcr::storage::CPGSnapshot;
     use vcr::cpg::model::CPG;
-    use tempfile::NamedTempFile;
+    use std::path::PathBuf;
     
     // For now: save empty CPG as demo
     // Full implementation would get current CPG from global state
     let cpg = CPG::new();
     
-    let temp = NamedTempFile::new()
-        .map_err(|e| format!("Failed to create temp file: {}", e))?;
+    let temp_path = PathBuf::from("/tmp/vtr-snapshot-demo.bin");
     
-    let snapshot_id = CPGSnapshot::save(&cpg, temp.path())
+    let snapshot_id = CPGSnapshot::save(&cpg, &temp_path)
         .map_err(|e| format!("Snapshot save failed: {}", e))?;
     
     let hash = cpg.compute_hash();
