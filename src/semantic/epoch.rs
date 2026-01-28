@@ -121,6 +121,21 @@ impl SemanticEpoch {
             invalidation_stats: self.invalidation.stats(),
         }
     }
+
+    /// Get all file IDs in this epoch
+    pub fn get_all_file_ids(&self) -> Vec<FileId> {
+        let mut file_ids: std::collections::HashSet<_> = std::collections::HashSet::new();
+        
+        // Collect from all sources
+        file_ids.extend(self.cfgs.keys());
+        file_ids.extend(self.dfgs.keys());
+        file_ids.extend(self.symbols.keys());
+        
+        // Return sorted for determinism
+        let mut sorted: Vec<_> = file_ids.into_iter().collect();
+        sorted.sort();
+        sorted
+    }
 }
 
 impl Drop for SemanticEpoch {
