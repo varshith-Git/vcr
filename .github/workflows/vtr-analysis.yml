@@ -25,14 +25,14 @@ jobs:
       - name: Run VTR ingestion
         id: ingest
         run: |
-          ./target/release/vtr ingest src/ > vtr-results.json
+          ./target/release/vtr ingest src/lib.rs > vtr-results.json
           cat vtr-results.json
         continue-on-error: true
       
       - name: Verify determinism
         id: verify
         run: |
-          ./target/release/vtr ingest src/ > vtr-verify.json
+          ./target/release/vtr ingest src/lib.rs > vtr-verify.json
           diff vtr-results.json vtr-verify.json && echo "✓ Determinism verified" || echo "✗ Hash mismatch!"
         continue-on-error: true
       
