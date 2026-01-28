@@ -27,7 +27,7 @@ pub struct RecoveryManager {
 impl RecoveryManager {
     /// Create new recovery manager
     pub fn new(snapshot_dir: PathBuf) -> Self {
-        Self { snapshot_dir }
+        Self { _snapshot_dir: snapshot_dir }
     }
     
     /// Check recovery state

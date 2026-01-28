@@ -3,10 +3,10 @@
 //! **Critical**: All commits happen on one thread in deterministic order
 
 use crate::cpg::model::{CPG, CPGNodeId};
-use crate::execution::plan::{ExecutionPlan, DeterministicOrder};
-use crate::execution::task::{Task, TaskId, WorkFragment};
+use crate::execution::plan::ExecutionPlan;
+use crate::execution::task::{Task, WorkFragment};
 use crate::query::primitives::QueryPrimitives;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 /// Query result
@@ -22,7 +22,7 @@ impl Scheduler {
     /// Create a new scheduler
     pub fn new(thread_count: usize) -> Self {
         Self {
-            thread_count: thread_count.max(1),
+            _thread_count: thread_count.max(1),
         }
     }
 
