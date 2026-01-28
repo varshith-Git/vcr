@@ -1,0 +1,48 @@
+// FlatBuffers schema for CPG snapshots (Path B2)
+//
+// **Critical**: Field ordering is explicit and must never change
+// Version bumps if schema changes
+
+namespace valori.snapshot;
+
+// Snapshot metadata
+table SnapshotMetadata {
+  version: uint32;
+  epoch_id: uint64;
+  cpg_hash: string;
+  timestamp: uint64;
+}
+
+// CPG node data (matches src/cpg/model.rs)
+table CPGNodeData {
+  id: uint64;
+  kind: uint8;  // CPGNodeKind as u8
+  origin_type: uint8;  // OriginRef discriminator
+  origin_data: uint64;  // Origin ID
+  range_start: uint32;
+  range_end: uint32;
+}
+
+// CPG edge data
+table CPGEdgeData {
+  id: uint64;
+  kind: uint8;  // CPGEdgeKind as u8
+  from_node: uint64;
+  to_node: uint64;
+}
+
+// Index data (simplified)
+table CPGIndicesData {
+  // Future: serialize indices
+  placeholder: uint32;
+}
+
+// Root table
+table CPGSnapshot {
+  metadata: SnapshotMetadata;
+  nodes: [CPGNodeData];
+  edges: [CPGEdgeData];
+  indices: CPGIndicesData;
+}
+
+root_type CPGSnapshot;
