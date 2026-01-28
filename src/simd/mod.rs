@@ -14,7 +14,7 @@
 
 pub mod filters;
 
-pub use filters::{filter_by_kind_simd, filter_by_kind_scalar};
+pub use filters::{filter_by_kind, filter_by_kind_scalar};
 
 /// Check if SIMD is available at runtime
 #[cfg(target_arch = "x86_64")]
