@@ -33,6 +33,9 @@ thiserror = "1.0"
 # Parallel execution (optional)
 rayon = { version = "1.10", optional = true }
 
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 tempfile = "3.8"

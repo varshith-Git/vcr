@@ -1,0 +1,24 @@
+# VTR Configuration
+# 
+# Zero magic. Explicit behavior.
+
+[io]
+# I/O mode: "auto", "hot", "cold"
+mode = "auto"
+
+# Enable io_uring (Linux-only, feature-flagged)
+uring_enabled = false
+
+[snapshot]
+# Snapshot directory
+path = "./snapshots"
+
+# Auto-save on completion
+auto_save = true
+
+[execution]
+# Enable parallel execution (requires feature flag)
+parallel = false
+
+# Thread count (0 = auto)
+thread_count = 0
