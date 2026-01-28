@@ -206,20 +206,34 @@ fn cmd_snapshot_verify(path: PathBuf) -> Result<String, String> {
     }
 }
 
-fn cmd_query(_query_file: PathBuf) -> Result<String, String> {
-    // TODO: Wire to QueryPrimitives
-    // 1. Load query from file (JSON)
-    // 2. Execute against current CPG
-    // 3. Output results (JSON)
+fn cmd_query(query_file: PathBuf) -> Result<String, String> {
+    use vcr::cpg::model::CPG;
+    use vcr::query::primitives::QueryPrimitives;
+    use vcr::cpg::model::CPGNodeKind;
     
-    Ok("{\"status\":\"success\",\"results\":[]}".to_string())
+    // For now: simple hardcoded query demo
+    // Full implementation would parse query file (JSON DSL)
+    
+    if !query_file.exists() {
+        return Err(format!("Query file not found: {}", query_file.display()));
+    }
+    
+    // Demo: empty CPG, find all functions
+    let cpg = CPG::new();
+    let results = QueryPrimitives::find_nodes(&cpg, CPGNodeKind::Function);
+    
+    Ok(format!("{{\"status\":\"success\",\"query\":\"{}\",\"results\":[],\"count\":{}}}", 
+        query_file.display(), results.len()))
 }
 
-fn cmd_explain(_result_id: String) -> Result<String, String> {
-    // TODO: Implement deterministic provenance trace
-    // 1. Load result metadata
-    // 2. Trace origin nodes
-    // 3. Output provenance chain
+fn cmd_explain(result_id: String) -> Result<String, String> {
+    // Deterministic provenance trace
+    // For now: placeholder implementation
+    // Full version would:
+    // 1. Load result metadata from store
+    // 2. Trace back through CPG to origin nodes
+    // 3. Output complete provenance chain
     
-    Ok("{\"status\":\"success\",\"provenance\":[]}".to_string())
+    Ok(format!("{{\"status\":\"success\",\"result_id\":\"{}\",\"provenance\":[\"TODO: trace origin\"]}}", 
+        result_id))
 }
