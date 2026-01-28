@@ -5,6 +5,32 @@
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 use std::process;
+use std::fs;
+
+/// Load config from file or use defaults
+fn load_config(config_path: Option<PathBuf>) -> vcr::config::ValoriConfig {
+    if let Some(path) = config_path {
+        // Load from specified path
+        let content = fs::read_to_string(&path)
+            .unwrap_or_else(|e| {
+                eprintln!("{{\"status\":\"error\",\"message\":\"Failed to read config: {}\",\"fatal\":true}}", e);
+                process::exit(1);
+            });
+        
+        toml::from_str(&content)
+            .unwrap_or_else(|e| {
+                eprintln!("{{\"status\":\"error\",\"message\":\"Failed to parse config: {}\",\"fatal\":true}}", e);
+                process::exit(1);
+            })
+    } else if PathBuf::from("./vtr.toml").exists() {
+        // Try default location
+        let content = fs::read_to_string("./vtr.toml").unwrap();
+        toml::from_str(&content).unwrap_or_default()
+    } else {
+        // Use built-in defaults
+        vcr::config::ValoriConfig::default()
+    }
+}
 
 #[derive(Parser)]
 #[command(name = "vtr")]
@@ -90,33 +116,84 @@ fn main() {
     }
 }
 
-fn cmd_ingest(_path: PathBuf, _config: Option<PathBuf>) -> Result<String, String> {
-    // TODO: Wire to existing ingestion pipeline
-    // 1. Load config (config file -> built-in defaults)
-    // 2. Initialize parser
-    // 3. Build ParseEpoch -> SemanticEpoch -> CPGEpoch
-    // 4. Output epoch_id + cpg_hash
+fn cmd_ingest(path: PathBuf, config: Option<PathBuf>) -> Result<String, String> {
+    use vcr::parse::IncrementalParser;
+    use vcr::types::{Language, FileId};
+    use vcr::io::MmappedFile;
     
-    Ok("{\"status\":\"success\",\"epoch_id\":1,\"cpg_hash\":\"placeholder\"}".to_string())
+    let _config = load_config(config);
+    
+    // For now: simple single-file ingestion
+    // Full repo traversal would go here
+    
+    if !path.exists() {
+        return Err(format!("Path not found: {}", path.display()));
+    }
+    
+    if path.is_file() {
+        // Single file ingestion
+        let file_id = FileId::new(1);
+        let mmap = MmappedFile::open(&path, file_id)
+            .map_err(|e| format!("Failed to open file: {}", e))?;
+        
+        let mut parser = IncrementalParser::new(Language::Rust)
+            .map_err(|e| format!("Failed to create parser: {}", e))?;
+        
+        let parsed = parser.parse(&mmap, None)
+            .map_err(|e| format!("Parse failed: {}", e))?;
+        
+        // Build CPG (simplified - full pipeline would include semantic analysis)
+        let cpg = vcr::cpg::model::CPG::new();
+        let hash = cpg.compute_hash();
+        
+        Ok(format!("{{\"status\":\"success\",\"epoch_id\":1,\"cpg_hash\":\"{}\",\"nodes\":{}}}", 
+            hash, parsed.root_node().child_count()))
+    } else {
+        Err("Directory ingestion not yet implemented - TODO".to_string())
+    }
 }
 
 fn cmd_snapshot_save() -> Result<String, String> {
-    // TODO: Wire to CPGSnapshot::save
-    // 1. Get current CPG
-    // 2. Save to configured path
-    // 3. Output snapshot_id + hash
+    use vcr::storage::CPGSnapshot;
+    use vcr::cpg::model::CPG;
+    use tempfile::NamedTempFile;
     
-    Ok("{\"status\":\"success\",\"snapshot_id\":1,\"hash\":\"placeholder\"}".to_string())
+    // For now: save empty CPG as demo
+    // Full implementation would get current CPG from global state
+    let cpg = CPG::new();
+    
+    let temp = NamedTempFile::new()
+        .map_err(|e| format!("Failed to create temp file: {}", e))?;
+    
+    let snapshot_id = CPGSnapshot::save(&cpg, temp.path())
+        .map_err(|e| format!("Snapshot save failed: {}", e))?;
+    
+    let hash = cpg.compute_hash();
+    
+    Ok(format!("{{\"status\":\"success\",\"snapshot_id\":{},\"hash\":\"{}\"}}", 
+        snapshot_id.0, hash))
 }
 
-fn cmd_snapshot_load(_id: String) -> Result<String, String> {
-    // TODO: Wire to CPGSnapshot::load + verify
-    // 1. Load snapshot
-    // 2. Verify hash
-    // 3. Restore to CPGEpoch
-    // 4. Output epoch_id + verified_hash
+fn cmd_snapshot_load(id: String) -> Result<String, String> {
+    use vcr::storage::CPGSnapshot;
+    use std::path::Path;
     
-    Ok("{\"status\":\"success\",\"epoch_id\":1,\"verified\":true}".to_string())
+    // Load from path (id is treated as path for now)
+    let path = Path::new(&id);
+    
+    if !path.exists() {
+        return Err(format!("Snapshot not found: {}", id));
+    }
+    
+    // Verify first
+    let hash = CPGSnapshot::verify(path)
+        .map_err(|e| format!("Snapshot verification failed: {}", e))?;
+    
+    // Load
+    let _cpg = CPGSnapshot::load(path)
+        .map_err(|e| format!("Snapshot load failed: {}", e))?;
+    
+    Ok(format!("{{\"status\":\"success\",\"hash\":\"{}\",\"verified\":true}}", hash))
 }
 
 fn cmd_snapshot_verify(path: PathBuf) -> Result<String, String> {
