@@ -36,6 +36,10 @@ pub mod cpg;  // Phase 3
 pub mod analysis;  // Phase 3
 pub mod query;  // Phase 3
 pub mod execution;  // Phase 4
+pub mod simd;  // Phase 4
+pub mod optimizer;  // Phase 4
+pub mod storage;  // Phase 4
+pub mod api;  // Phase 4
 pub mod types;
 
 // Re-export public API

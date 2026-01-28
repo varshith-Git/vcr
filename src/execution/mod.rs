@@ -15,6 +15,6 @@ pub mod plan;
 pub mod scheduler;
 pub mod task;
 
-pub use plan::{ExecutionPlan, Stage};
+pub use plan::{ExecutionPlan, Stage, DeterministicOrder};
 pub use task::{Task, TaskId, WorkFragment};
 pub use scheduler::Scheduler;
