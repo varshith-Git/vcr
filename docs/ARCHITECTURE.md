@@ -1,116 +1,127 @@
 # VCR Architecture
 
-This document details the internal architecture of **Valori Code Replay (VCR)**, emphasizing its deterministic kernel and fail-closed design.
+**Abstract**
+Valori Code Replay (VCR) is a deterministic, fail-closed static analysis kernel designed for high-assurance environments. This document outlines the system architecture, formally defining the separation between the User Space control plane and the Kernel Space data plane. The system prioritizes provenance and reproducibility over heuristic optimization.
+
+## 1. System Topology
+
+The architecture is strictly layered to enforce determinism boundaries.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#202020', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#24292e', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f6f8fa', 'fontFamily': 'arial'}}}%%
 
 graph TD
-    %% Styling
-    classDef input fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef cli fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    classDef kernel fill:#f3e5f5,stroke:#4a148c,stroke-width:4px;
-    classDef memory fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
-    classDef storage fill:#eceff1,stroke:#37474f,stroke-width:2px;
-    classDef analysis fill:#ffebee,stroke:#b71c1c,stroke-width:2px;
+    %% --- Style Definitions ---
+    classDef userSpace fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef kernelSpace fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px;
+    classDef artifact fill:#eceff1,stroke:#455a64,stroke-width:2px;
+    
+    classDef process fill:#ffffff,stroke:#333,stroke-width:2px,color:#333;
+    classDef data fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,rx:5,ry:5;
+    classDef critical fill:#ffebee,stroke:#c62828,stroke-width:3px;
 
-    subgraph User["User Space"]
-        Code[("Source Code<br/>(File System)")]:::input
-        Config["vcr.toml"]:::input
-        CLI["VCR CLI (vcr)"]:::cli
+    %% --- User Space (Control Plane) ---
+    subgraph UserSpace ["User Control Plane"]
+        CLI(("\n    VCR CLI    \n")):::process
+        Config["Configuration\n(vcr.toml)"]:::data
     end
 
-    subgraph Kernel["VCR Kernel (Deterministic Core)"]
+    %% --- Kernel Space (Data Plane) ---
+    subgraph KernelSpace ["Deterministic Kernel Scope"]
         direction TB
         
-        %% Ingestion Phase
-        subgraph Ingest["Phase 1: Ingestion"]
-            Parser["Incremental Parser<br/>(Tree-sitter)"]:::kernel
-            Hasher["Canonical Hasher<br/>(SHA-256)"]:::kernel
+        subgraph Epoch0 ["Ingestion Layer"]
+            SourceFiles["Source Code"]:::data
+            Parser[/"Incremental\nParser"/]:::process
+            MMap["Memory Map\nArena"]:::data
+            CanonicalHasher{{"Canonical\nHasher"}}:::critical
         end
 
-        %% Semantic Phase
-        subgraph Semantic["Phase 2: Semantic (In-Memory)"]
-            AST["Abstract Syntax Tree<br/>(AST)"]:::memory
-            SymTable["Symbol Table<br/>(Defs/Refs)"]:::memory
-            Builder["Graph Builder"]:::kernel
+        subgraph Epoch1 ["Semantic Construction"]
+            AST["Abstract Syntax\nTree"]:::data
+            SymTable["Symbol\nTable"]:::data
+            GraphBuilder[/"Graph Builder"/]:::process
         end
 
-        %% Graph Phase
-        subgraph CPG["Phase 3: Code Property Graph"]
-            UnifiedGraph[("Unified CPG")]:::kernel
+        subgraph Epoch2 ["Graph Projection (CPG)"]
+            UnifiedGraph[("Unified CPG")]:::critical
             
-            subgraph Layers
-                CFG["Control Flow (CFG)"]:::analysis
-                DFG["Data Flow (DFG)"]:::analysis
-                Taint["Taint Paths"]:::analysis
+            subgraph Projections
+                CFG["Control Flow"]:::data
+                DFG["Data Flow"]:::data
+                Taint["Taint Paths"]:::data
             end
         end
 
-        %% Execution Phase
-        subgraph Exec["Phase 4: Execution"]
-            Plan["Query Planner"]:::kernel
-            Explain["Provenance Tracer"]:::kernel
+        subgraph Execution ["Query Execution"]
+            Planner[/"Query Planner"/]:::process
+            Tracer[/"Provenance Tracer"/]:::process
         end
     end
 
-    subgraph Artifacts["Storage & Outputs"]
-        Snapshot[("Snapshot<br/>(.bin)")]:::storage
-        JSON["Analysis Result<br/>(.json)"]:::storage
+    %% --- Artifact Persistence ---
+    subgraph Storage ["Persistence Layer"]
+        Snapshot[("Snapshot Artifact\n(SHA-256 Verified)")]:::artifact
+        JSON["Analysis Output\n(.json)"]:::artifact
     end
 
-    %% Flows
-    Code -->|"Read (mmap)"| Parser
-    Code -->|"Hash Content"| Hasher
-    Config --> CLI
-
-    CLI -->|"Command (ingest)"| Parser
+    %% --- Data Flow Relationships ---
     
-    Parser -->|"Update / Reuse"| AST
-    Parser -->|"Cache Hit"| Hasher
+    %% Input
+    Config --> CLI
+    CLI -->|"Invokes"| Parser
+    SourceFiles -->|"Read (mmap)"| MMap
+    
+    %% Phase 1
+    MMap --> Parser
+    Parser -->|"Delta Update"| AST
+    MMap -->|"Bit-Exact Stream"| CanonicalHasher
+    CanonicalHasher -.->|"Certifies"| UnifiedGraph
 
-    AST --> Builder
-    SymTable --> Builder
+    %% Phase 2
+    AST --> GraphBuilder
+    SymTable --> GraphBuilder
+    GraphBuilder -->|"Constructs"| UnifiedGraph
 
-    Builder -->|"Construct"| UnifiedGraph
+    %% Phase 3
     UnifiedGraph --- CFG
     UnifiedGraph --- DFG
     UnifiedGraph --- Taint
 
-    UnifiedGraph -->|"Save"| Snapshot
-    Snapshot -->|"Load (Replay)"| UnifiedGraph
+    %% Phase 4
+    UnifiedGraph -->|"Query"| Planner
+    Planner -->|"Trace"| Tracer
+    Tracer -->|"Serialize"| JSON
 
-    UnifiedGraph -->|"Query"| Plan
-    Plan -->|"Trace"| Explain
-    Explain -->|"Serialize"| JSON
+    %% Storage
+    UnifiedGraph ==>|"Serialize State"| Snapshot
+    Snapshot ==>|"Hydrate (Replay)"| UnifiedGraph
 
-    %% Legend / Validation
-    Hasher -.->|"Verify"| UnifiedGraph
-    Hasher -.->|"Verify"| Snapshot
+    %% Validation Links (Dotted)
+    CanonicalHasher -.->|"Verify Integrity"| Snapshot
 
-    linkStyle default stroke-width:2px,fill:none,stroke:black;
+    %% Formatting
+    class UserSpace userSpace;
+    class KernelSpace kernelSpace;
+    class Storage artifact;
+    
+    linkStyle default stroke:black,stroke-width:2px,fill:none;
+    linkStyle 9,15 stroke:#c62828,stroke-width:3px; %% Highlight critical trust paths
 ```
 
-## System Components
+## 2. Component Formalism
 
-### 1. Ingestion Layer (Blue)
-Responsible for getting code into memory deterministically.
-- **Incremental Parser**: Uses `tree-sitter` to parse files. If a file hasn't changed (mtime + content hash), key structures are reused from previous epochs.
-- **Canonical Hasher**: The "Source of Truth". Every byte of input is hashed. If this hash does not match the output hash, the system crashes (Fail-Closed).
+### 2.1 The Trust Boundary
+The system enforces a strict boundary between "Inputs" (potentially untrusted) and the "Unified CPG" (proven trusted).
+*   **Canonical Hasher**: Serves as the distinct cryptographic gatekeeper. It computes `H(input)`.
+*   **Fail-Closed Logic**: If any semantic construction results in a state $S$ such that $H(S) \neq H(input)$, the kernel panics immediately. This prevents "silent corruption".
 
-### 2. The Kernel (Purple)
-The brain of VCR. It operates in **Epochs**.
-- **Memory Arena**: Code is allocated in arenas that are reset per epoch. No GC pauses.
-- **Graph Builder**: transforms the raw AST into the CPG.
-- **Fail-Closed**: Any logic error or potential non-determinism (e.g., iterating a HashMap) triggers a panic.
+### 2.2 Semantic Projections
+The CPG is not a single graph but a unified projection of three mathematical structures:
+1.  **AST ($T$)**: The hierarchical syntactic structure.
+2.  **CFG ($G_c$)**: The directed graph of execution flow where edge $(u,v)$ implies control transfer.
+3.  **DFG ($G_d$)**: The flow of data values, essential for Taint Analysis.
 
-### 3. The Code Property Graph (CPG)
-The central data structure.
-- **AST**: Hierarchy (File -> Class -> Method).
-- **CFG**: Execution flow (If -> Then -> Else).
-- **DFG**: Variable flow (Data -> Var A -> Var B).
-- **Taint**: Security paths (Source -> Sink).
-
-### 4. Storage & Replay (Grey)
-- **Snapshots**: The CPG can be serialized to disk. This is a binary dump of the memory arenas.
-- **Replay**: Loading a snapshot restores the *exact* memory state of the kernel, allowing queries to be run years later with bit-perfect accuracy.
+### 2.3 Persistence & Replayability
+*   **Snapshots**: Are **isomorphic** to the in-memory state.
+*   **Replay**: The operation `Load(Snapshot)` is guaranteed to yield a memory state identical to the original analysis epoch, preserving $O(1)$ query determinism over time.
