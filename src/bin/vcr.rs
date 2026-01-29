@@ -33,8 +33,8 @@ fn load_config(config_path: Option<PathBuf>) -> vcr::config::ValoriConfig {
 }
 
 #[derive(Parser)]
-#[command(name = "vtr")]
-#[command(about = "Valori Temporal Replay - deterministic code analysis")]
+#[command(name = "vcr")]
+#[command(about = "Valori Code Replay - deterministic code analysis")]
 #[command(version)]
 struct Cli {
     #[command(subcommand)]

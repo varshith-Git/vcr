@@ -1,4 +1,4 @@
-# VTR: Valori Temporal Replay
+# VCR: Valori Code Replay
 
 **Deterministic Code Analysis Infrastructure.**
 
@@ -6,18 +6,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![v0.1.0](https://img.shields.io/badge/release-v0.1.0-green)](https://github.com/varshith-Git/vcr/releases/tag/v0.1.0)
 
-> "If VTR says something, we can prove why — forever."
+> "If VCR says something, we can prove why — forever."
 
 ---
 
-## 🏗 What is VTR?
+## 🏗 What is VCR?
 
-VTR is an **audit-grade** code analysis kernel designed for environments where "probably correct" is not enough.
+VCR is an **audit-grade** code analysis kernel designed for environments where "probably correct" is not enough.
 
-Unlike traditional linters or LSPs that prioritize speed and heuristics, VTR prioritizes **Determinism** and **Provenance**. It builds a queryable **Code Property Graph (CPG)** that connects control flow, data flow, and syntax into a single, hash-verified structure.
+Unlike traditional linters or LSPs that prioritize speed and heuristics, VCR prioritizes **Determinism** and **Provenance**. It builds a queryable **Code Property Graph (CPG)** that connects control flow, data flow, and syntax into a single, hash-verified structure.
 
 ### The Guarantee
-| Property | VTR Guarantee |
+| Property | VCR Guarantee |
 |----------|---------------|
 | **Determinism** | Same input → Exact same hash (always) |
 | **Stability** | Parallel execution = Serial results |
@@ -32,33 +32,33 @@ Unlike traditional linters or LSPs that prioritize speed and heuristics, VTR pri
 
 ```bash
 # From source (v0.1.0)
-cargo install --path . --bin vtr
+cargo install --path . --bin vcr
 ```
 
 ### Usage
 
 1. **Ingest Code**: Build the deterministic graph.
    ```bash
-   vtr ingest ./src > graph.json
+   vcr ingest ./src > graph.json
    # Output includes canonical SHA-256 hash of the analysis
    ```
 
 2. **Save Snapshot**: Persist the state for later replay.
    ```bash
-   vtr snapshot save
+   vcr snapshot save
    # Saves to ./vtr-snapshots/ with hash verification
    ```
 
 3. **Verify Integrity**: Prove nothing changed.
    ```bash
-   vtr snapshot verify ./vtr-snapshots/snap-1.bin
+   vcr snapshot verify ./vtr-snapshots/snap-1.bin
    ```
 
 ---
 
 ## 📐 Architecture
 
-VTR is built on a **Kernel/User** model:
+VCR is built on a **Kernel/User** model:
 
 ### 1. The Kernel (Core)
 - **Epoch-Based Memory**: Zero garbage collection pauses, deterministic cleanup.
@@ -67,9 +67,9 @@ VTR is built on a **Kernel/User** model:
 - **Taint Analysis**: Bounded, path-sensitive data flow tracking.
 
 ### 2. The User (CLI)
-- **Minimal Wiring**: The `vtr` binary is a thin wrapper around the kernel.
+- **Minimal Wiring**: The `vcr` binary is a thin wrapper around the kernel.
 - **JSON-First**: Output is machine-readable for CI/CD integration.
-- **Explicit Config**: No magic defaults. You control `vtr.toml`.
+- **Explicit Config**: No magic defaults. You control `vcr.toml`.
 
 ---
 
@@ -95,9 +95,9 @@ VTR is built on a **Kernel/User** model:
 
 ## 🛡 Security & Determinism
 
-VTR fails closed. If a hash mismatches, if a bit flips, or if an analysis path is ambiguous, VTR will **crash** rather than return a potentially incorrect result.
+VCR fails closed. If a hash mismatches, if a bit flips, or if an analysis path is ambiguous, VCR will **crash** rather than return a potentially incorrect result.
 
-See [Why VTR is Deterministic](docs/WHY_DETERMINISTIC.md) for the technical proof.
+See [Why VCR is Deterministic](docs/WHY_DETERMINISTIC.md) for the technical proof.
 
 ---
 
