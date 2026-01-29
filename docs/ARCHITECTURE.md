@@ -106,7 +106,7 @@ graph TD
     class Storage artifact;
     
     linkStyle default stroke:black,stroke-width:2px,fill:none;
-    linkStyle 9,15 stroke:#c62828,stroke-width:3px; %% Highlight critical trust paths
+    linkStyle 9,15 stroke:#c62828,stroke-width:3px;
 ```
 
 ## 2. Component Formalism
