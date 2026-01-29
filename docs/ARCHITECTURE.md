@@ -23,7 +23,14 @@ graph TD
     %% --- User Space (Control Plane) ---
     subgraph UserSpace ["User Control Plane"]
         CLI(("\n    VCR CLI    \n")):::process
-        Config["Configuration\n(vcr.toml)"]:::data
+        
+        subgraph ConfigScope ["Config (vcr.toml)"]
+            direction TB
+            Params1["Includes / Excludes"]:::data
+            Params2["Thread Count"]:::data
+            Params3["Memory Limits"]:::data
+            Params4["Fail-Closed Mode"]:::data
+        end
     end
 
     %% --- Kernel Space (Data Plane) ---
