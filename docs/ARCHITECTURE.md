@@ -19,6 +19,7 @@ graph TD
     classDef process fill:#ffffff,stroke:#333,stroke-width:2px,color:#333;
     classDef data fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,rx:5,ry:5;
     classDef critical fill:#fff8e1,stroke:#ff8f00,stroke-width:3px;
+    classDef config fill:#000000,stroke:#ffffff,stroke-width:1px,color:#ffffff;
 
     %% --- User Space (Control Plane) ---
     subgraph UserSpace ["User Control Plane"]
@@ -26,10 +27,10 @@ graph TD
         
         subgraph ConfigScope ["Config (vcr.toml)"]
             direction TB
-            Params1["Includes / Excludes"]:::data
-            Params2["Thread Count"]:::data
-            Params3["Memory Limits"]:::data
-            Params4["Fail-Closed Mode"]:::data
+            Params1["Includes / Excludes"]:::config
+            Params2["Thread Count"]:::config
+            Params3["Memory Limits"]:::config
+            Params4["Fail-Closed Mode"]:::config
         end
     end
     
