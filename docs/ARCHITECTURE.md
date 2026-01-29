@@ -23,6 +23,7 @@ graph TD
     %% --- User Space (Control Plane) ---
     subgraph UserSpace ["User Control Plane"]
         CLI(("\n    VCR CLI    \n")):::process
+        Lib["Rust Crate API\n(vcr)"]:::process
         
         subgraph ConfigScope ["Config (vcr.toml)"]
             direction TB
@@ -76,7 +77,9 @@ graph TD
     
     %% Input
     Config --> CLI
+    Config --> Lib
     CLI -->|"Invokes"| Parser
+    Lib -->|"Invokes"| Parser
     SourceFiles -->|"Read (mmap)"| MMap
     
     %% Phase 1
