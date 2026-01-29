@@ -88,7 +88,7 @@ graph TD
     Hasher -.->|"Verify"| UnifiedGraph
     Hasher -.->|"Verify"| Snapshot
 
-    linkStyle default stroke-width:2px,fill:none,stroke:#333;
+    linkStyle default stroke-width:2px,fill:none,stroke:black;
 ```
 
 ## System Components
