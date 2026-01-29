@@ -18,12 +18,11 @@ graph TD
     
     classDef process fill:#ffffff,stroke:#333,stroke-width:2px,color:#333;
     classDef data fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,rx:5,ry:5;
-    classDef critical fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef critical fill:#fff8e1,stroke:#ff8f00,stroke-width:3px;
 
     %% --- User Space (Control Plane) ---
     subgraph UserSpace ["User Control Plane"]
         CLI(("\n    VCR CLI    \n")):::process
-        Lib["Rust Crate API\n(vcr)"]:::process
         
         subgraph ConfigScope ["Config (vcr.toml)"]
             direction TB
@@ -33,6 +32,8 @@ graph TD
             Params4["Fail-Closed Mode"]:::data
         end
     end
+    
+    Lib["Rust Crate API\n(vcr)"]:::process
 
     %% --- Kernel Space (Data Plane) ---
     subgraph KernelSpace ["Deterministic Kernel Scope"]
