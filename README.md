@@ -8,6 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-green)](https://github.com/varshith-Git/vcr/releases/tag/v0.1.0)
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org/)
+[![DOI](https://zenodo.org/badge/1144457827.svg)](https://doi.org/10.5281/zenodo.18441515)
 
 > *"If VCR says something, we can prove why — forever."*
 
