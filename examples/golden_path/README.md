@@ -2,7 +2,7 @@
 
 **Purpose**: Regression sanity check for v0.1.0
 
-Not for marketing. For validation that VTR still works.
+Not for marketing. For validation that VCR still works.
 
 ---
 
@@ -18,13 +18,13 @@ Not for marketing. For validation that VTR still works.
 
 ```bash
 # Ingest
-vtr ingest examples/golden_path/simple.rs
+vcr ingest examples/golden_path/simple.rs
 
 # Query
-vtr query examples/golden_path/query.json
+vcr query examples/golden_path/query.json
 
 # Explain
-vtr explain test-result-1
+vcr explain test-result-1
 ```
 
 ---
@@ -52,8 +52,8 @@ Run this example before every release:
 
 ```bash
 # Should produce identical output every time
-vtr ingest examples/golden_path/simple.rs > /tmp/out1.json
-vtr ingest examples/golden_path/simple.rs > /tmp/out2.json
+vcr ingest examples/golden_path/simple.rs > /tmp/out1.json
+vcr ingest examples/golden_path/simple.rs > /tmp/out2.json
 diff /tmp/out1.json /tmp/out2.json  # Should be empty
 ```
 

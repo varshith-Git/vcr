@@ -1,4 +1,4 @@
-# VTR CI Integration Guide - Option A
+# VCR CI Integration Guide - Option A
 
 **Target**: VCR repository (self-analysis)  
 **Mode**: Shadow (observational, non-blocking)  
@@ -30,7 +30,7 @@ ls -lh target/release/vtr
 Create `.github/workflows/vtr-analysis.yml`:
 
 ```yaml
-name: VTR Analysis (Observational)
+name: VCR Analysis (Observational)
 
 on:
   pull_request:
@@ -51,26 +51,26 @@ jobs:
         with:
           toolchain: stable
       
-      - name: Build VTR
+      - name: Build VCR
         run: cargo build --release --bin vtr
       
-      - name: Run VTR ingestion
+      - name: Run VCR ingestion
         id: ingest
         run: |
-          ./target/release/vtr ingest src/ > vtr-results.json
+          ./target/release/vcr ingest src/ > vtr-results.json
           cat vtr-results.json
         continue-on-error: true
       
       - name: Verify determinism
         id: verify
         run: |
-          ./target/release/vtr ingest src/ > vtr-verify.json
+          ./target/release/vcr ingest src/ > vtr-verify.json
           diff vtr-results.json vtr-verify.json && echo "✓ Determinism verified" || echo "✗ Hash mismatch!"
         continue-on-error: true
       
       - name: Save snapshot
         run: |
-          ./target/release/vtr snapshot save > snapshot-info.json
+          ./target/release/vcr snapshot save > snapshot-info.json
           cat snapshot-info.json
         continue-on-error: true
       
@@ -86,7 +86,7 @@ jobs:
       
       - name: Report status
         run: |
-          echo "## VTR Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "## VCR Analysis Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Ingestion**: $(jq -r '.status' vtr-results.json)" >> $GITHUB_STEP_SUMMARY
           echo "**CPG Hash**: $(jq -r '.cpg_hash' vtr-results.json)" >> $GITHUB_STEP_SUMMARY
@@ -109,11 +109,11 @@ Before pushing to CI, test locally:
 
 ```bash
 # Test ingestion
-./target/release/vtr ingest src/ > local-test.json
+./target/release/vcr ingest src/ > local-test.json
 cat local-test.json
 
 # Verify determinism
-./target/release/vtr ingest src/ > local-verify.json
+./target/release/vcr ingest src/ > local-verify.json
 diff local-test.json local-verify.json
 
 # Expected output: empty diff (files identical)
@@ -133,7 +133,7 @@ diff local-test.json local-verify.json
 Create a simple tracking spreadsheet or document:
 
 ```markdown
-## VTR CI Monitoring Log
+## VCR CI Monitoring Log
 
 ### Week 3
 
@@ -184,8 +184,8 @@ cat vtr-results.json | jq -r '.cpg_hash'
 # Clone fresh, run twice
 git clone [repo] /tmp/vtr-test
 cd /tmp/vtr-test
-./target/release/vtr ingest src/ > run1.json
-./target/release/vtr ingest src/ > run2.json
+./target/release/vcr ingest src/ > run1.json
+./target/release/vcr ingest src/ > run2.json
 
 # Must be identical
 diff run1.json run2.json
@@ -235,7 +235,7 @@ Create `scripts/check-vtr-ci.sh`:
 #!/bin/bash
 # Quick CI health check
 
-echo "=== VTR CI Health Check ==="
+echo "=== VCR CI Health Check ==="
 echo
 
 # Get last 10 runs
@@ -265,7 +265,7 @@ fi
 
 **After 8 weeks**:
 
-✅ VTR runs on every PR without intervention  
+✅ VCR runs on every PR without intervention  
 ✅ Same code always produces same hash  
 ✅ Determinism verified 100% of time  
 ✅ Zero developer complaints ("it's blocking me")  
@@ -287,7 +287,7 @@ diff vtr-results.json vtr-verify.json
 1. Check if input changed (git diff)
 2. Check cargo version (rustc --version)
 3. Check for non-deterministic dependencies
-4. Review recent changes to VTR
+4. Review recent changes to VCR
 
 # Resolution: STOP. Debug before continuing.
 ```
@@ -295,21 +295,21 @@ diff vtr-results.json vtr-verify.json
 ### CI Timeout
 
 ```bash
-# If VTR hangs
+# If VCR hangs
 # Add timeout to workflow:
 
-- name: Run VTR (with timeout)
+- name: Run VCR (with timeout)
   timeout-minutes: 5
-  run: ./target/release/vtr ingest src/
+  run: ./target/release/vcr ingest src/
 ```
 
 ### Too Slow
 
 ```bash
-# If VTR takes > 5 minutes
+# If VCR takes > 5 minutes
 
 # Option 1: Analyze subset
-vtr ingest src/core/  # Just core module
+vcr ingest src/core/  # Just core module
 
 # Option 2: Enable parallel (only if determinism verified)
 cargo build --release --features parallel-execution

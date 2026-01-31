@@ -1,6 +1,6 @@
-# Why VTR Always Gives the Same Answer
+# Why VCR Always Gives the Same Answer
 
-**A technical explanation of VTR's determinism guarantees**
+**A technical explanation of VCR's determinism guarantees**
 
 ---
 
@@ -21,9 +21,9 @@ You cannot audit decisions.
 
 ---
 
-## VTR's Approach
+## VCR's Approach
 
-VTR guarantees: **Same input → same output (always).**
+VCR guarantees: **Same input → same output (always).**
 
 Not "usually". Not "with high probability". **Always.**
 
@@ -65,7 +65,7 @@ assert_eq!(epoch1.hash(), epoch2.hash());  // Always true
 
 **Problem**: Graph traversal order affects results if not controlled.
 
-**VTR's solution**: Explicit ordering at every step.
+**VCR's solution**: Explicit ordering at every step.
 
 ### Control Flow Graph (CFG)
 
@@ -117,7 +117,7 @@ Same CPG → same hash. **Always.**
 
 **Problem**: Unbounded analysis (full interprocedural, whole-program) introduces complexity that breaks determinism.
 
-**VTR's choice**: Bounded, conservative analysis with explicit limits.
+**VCR's choice**: Bounded, conservative analysis with explicit limits.
 
 ### Pointer Analysis
 
@@ -153,7 +153,7 @@ If a path exists, we find it. If we hit the limit, we report incompleteness (det
 
 **Problem**: Parallelism introduces non-determinism via race conditions.
 
-**VTR's solution**: Parallel execution, serial commit.
+**VCR's solution**: Parallel execution, serial commit.
 
 ### Execution Model
 
@@ -186,7 +186,7 @@ assert_eq!(serial.hash(), parallel.hash());
 
 **Problem**: Partial failures lead to corrupted state.
 
-**VTR's choice**: Crash on any anomaly.
+**VCR's choice**: Crash on any anomaly.
 
 ### Hash Verification
 
@@ -250,9 +250,9 @@ assert_eq!(original_hash, restored_hash);  // Always true
 
 ---
 
-## What VTR Does NOT Do
+## What VCR Does NOT Do
 
-To maintain determinism, VTR explicitly **avoids**:
+To maintain determinism, VCR explicitly **avoids**:
 
 ❌ **Heuristics**: No "probably correct" approximations  
 ❌ **Timestamps in kernel**: Outside metadata only  
@@ -266,12 +266,12 @@ To maintain determinism, VTR explicitly **avoids**:
 
 ---
 
-## How to Verify VTR's Determinism
+## How to Verify VCR's Determinism
 
 **Test 1: Run twice**
 ```bash
-vtr ingest repo/ > out1.json
-vtr ingest repo/ > out2.json
+vcr ingest repo/ > out1.json
+vcr ingest repo/ > out2.json
 diff out1.json out2.json  # Must be empty
 ```
 
@@ -279,11 +279,11 @@ diff out1.json out2.json  # Must be empty
 ```bash
 # With io_uring
 cargo build --features cold-path-uring
-vtr ingest repo/ > with_uring.json
+vcr ingest repo/ > with_uring.json
 
 # Without io_uring  
 cargo build
-vtr ingest repo/ > without_uring.json
+vcr ingest repo/ > without_uring.json
 
 # Must match
 diff with_uring.json without_uring.json
@@ -292,13 +292,13 @@ diff with_uring.json without_uring.json
 **Test 3: Load snapshot**
 ```bash
 # Save
-vtr ingest repo/
-vtr snapshot save > snapshot.json
+vcr ingest repo/
+vcr snapshot save > snapshot.json
 HASH1=$(jq -r '.hash' snapshot.json)
 
 # Restart
-vtr snapshot load snapshot-id
-HASH2=$(vtr snapshot verify snapshot-id | jq -r '.hash')
+vcr snapshot load snapshot-id
+HASH2=$(vcr snapshot verify snapshot-id | jq -r '.hash')
 
 # Must match
 test "$HASH1" = "$HASH2"
@@ -308,11 +308,11 @@ test "$HASH1" = "$HASH2"
 ```bash
 # Serial
 cargo build
-vtr ingest repo/ > serial.json
+vcr ingest repo/ > serial.json
 
 # Parallel
 cargo build --features parallel-execution
-vtr ingest repo/ > parallel.json
+vcr ingest repo/ > parallel.json
 
 # Must match
 diff serial.json parallel.json
@@ -322,7 +322,7 @@ diff serial.json parallel.json
 
 ## Guarantees Summary
 
-| Property | VTR Guarantee |
+| Property | VCR Guarantee |
 |----------|---------------|
 | Same source → same CPG | ✅ Always |
 | Same query → same results | ✅ Always |
@@ -336,7 +336,7 @@ diff serial.json parallel.json
 
 ## Why This Matters
 
-**Security audits**: "What did VTR report on 2023-01-15?" → Load snapshot, replay exactly.
+**Security audits**: "What did VCR report on 2023-01-15?" → Load snapshot, replay exactly.
 
 **Compliance**: "Prove this code was analyzed correctly." → Hash verification chain.
 
@@ -364,7 +364,7 @@ Determinism is not free:
 
 ## Conclusion
 
-VTR always gives the same answer because:
+VCR always gives the same answer because:
 
 1. **Epochs are pure functions** (no hidden state)
 2. **Graphs have total order** (no random traversal)

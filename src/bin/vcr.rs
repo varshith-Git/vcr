@@ -162,7 +162,7 @@ fn cmd_snapshot_save() -> Result<String, String> {
     // Full implementation would get current CPG from global state
     let cpg = CPG::new();
     
-    let temp_path = PathBuf::from("/tmp/vtr-snapshot-demo.bin");
+    let temp_path = PathBuf::from("/tmp/vcr-snapshot-demo.bin");
     
     let snapshot_id = CPGSnapshot::save(&cpg, &temp_path)
         .map_err(|e| format!("Snapshot save failed: {}", e))?;

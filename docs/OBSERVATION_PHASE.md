@@ -1,4 +1,4 @@
-# VTR Observation Phase - Discipline & Guidelines
+# VCR Observation Phase - Discipline & Guidelines
 
 **Status**: v0.1.0 deployed. Now observing.
 
@@ -18,7 +18,7 @@ During observation, ONLY these changes are allowed:
 
 ### 1. Better Logs
 
-**Goal**: Understand what VTR is doing, without changing what it does.
+**Goal**: Understand what VCR is doing, without changing what it does.
 
 **Examples**:
 ```rust
@@ -96,8 +96,8 @@ auto_detect_best_mode = true  # ❌ Magic behavior
 **Examples**:
 ```markdown
 <!-- ALLOWED: Document actual behavior -->
-## How VTR Handles Errors
-VTR fails closed. Any hash mismatch crashes immediately.
+## How VCR Handles Errors
+VCR fails closed. Any hash mismatch crashes immediately.
 
 <!-- FORBIDDEN: Roadmap features -->
 ## Future: Auto-Recovery (coming soon!)  ❌
@@ -292,7 +292,7 @@ Add lessons from deployment:
 ```markdown
 ## Deployment Lessons
 
-- VTR requires stable filesystem (no NFS for snapshots)
+- VCR requires stable filesystem (no NFS for snapshots)
 - io_uring on kernel < 5.10: use hot-path mode
 - Parallel execution: measure first, enable only if needed
 ```
@@ -302,10 +302,10 @@ Based on actual questions:
 ```markdown
 ## FAQ
 
-Q: Why did VTR crash instead of continuing?
+Q: Why did VCR crash instead of continuing?
 A: Fail-closed philosophy. Corrupted state is unacceptable.
 
-Q: Can we make VTR faster?
+Q: Can we make VCR faster?
 A: Performance is optional. Enable feature flags if needed.
 ```
 
@@ -405,15 +405,15 @@ ONLY expand if:
 After 6 months:
 
 **Not**:
-- ❌ "VTR is fast"
-- ❌ "VTR has many features"
-- ❌ "VTR is widely deployed"
+- ❌ "VCR is fast"
+- ❌ "VCR has many features"
+- ❌ "VCR is widely deployed"
 
 **Instead**:
-- ✅ "VTR never lied"
-- ✅ "VTR never lost data"
-- ✅ "VTR always gives same answer"
-- ✅ "We trust VTR's output"
+- ✅ "VCR never lied"
+- ✅ "VCR never lost data"
+- ✅ "VCR always gives same answer"
+- ✅ "We trust VCR's output"
 
 ---
 

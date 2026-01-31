@@ -17,7 +17,7 @@ fn bench_cpg_build(c: &mut Criterion) {
                     CPGNodeId(i),
                     CPGNodeKind::Function,
                     OriginRef::Function { function_id: semantic::model::FunctionId(i) },
-                    ByteRange::new(i as u32 * 10, (i as u32 + 1) * 10),
+                    ByteRange::new((i * 10) as usize, ((i + 1) * 10) as usize),
                 )));
             }
             cpg
@@ -32,7 +32,7 @@ fn bench_query_execution(c: &mut Criterion) {
             CPGNodeId(i),
             CPGNodeKind::Function,
             OriginRef::Function { function_id: semantic::model::FunctionId(i) },
-            ByteRange::new(i as u32 * 10, (i as u32 + 1) * 10),
+            ByteRange::new((i * 10) as usize, ((i + 1) * 10) as usize),
         ));
     }
 
@@ -61,7 +61,7 @@ fn bench_cpg_hash(c: &mut Criterion) {
             CPGNodeId(i),
             CPGNodeKind::Function,
             OriginRef::Function { function_id: semantic::model::FunctionId(i) },
-            ByteRange::new(i as u32 * 10, (i as u32 + 1) * 10),
+            ByteRange::new((i * 10) as usize, ((i + 1) * 10) as usize),
         ));
     }
 

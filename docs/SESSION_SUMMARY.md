@@ -1,4 +1,4 @@
-## VTR v0.1.0 - Observation Phase
+## VCR v0.1.0 - Observation Phase
 
 **Status**: Production-ready infrastructure deployed  
 **Phase**: Observation (3-6 months)  
@@ -39,7 +39,7 @@
 
 ## Guarantees
 
-VTR v0.1.0 provides:
+VCR v0.1.0 provides:
 
 ✅ Same input → same output (always)  
 ✅ Parallel = serial results  
@@ -65,7 +65,7 @@ VTR v0.1.0 provides:
 ### Next 3-6 Months
 
 **Observation phase**:
-- Let VTR run without intervention
+- Let VCR run without intervention
 - Monitor stability (100% uptime target)
 - Validate determinism (weekly checks)
 - Document actual behavior
@@ -118,5 +118,5 @@ VTR v0.1.0 provides:
 
 **The kernel is complete. Now we observe.**
 
-VTR doesn't need more features.  
+VCR doesn't need more features.  
 It needs to prove it never lies.

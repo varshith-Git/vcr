@@ -1,4 +1,4 @@
-# VTR Narrow Deployment Strategy
+# VCR Narrow Deployment Strategy
 
 **Goal**: Validate operational behavior in production. Not adoption.
 
@@ -29,7 +29,7 @@ Pick ONE environment that is:
 **Setup**:
 ```yaml
 # .github/workflows/vtr-analysis.yml
-name: VTR Code Analysis
+name: VCR Code Analysis
 
 on:
   pull_request:
@@ -41,18 +41,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Run VTR
+      - name: Run VCR
         run: |
           cargo install --path path/to/vtr
-          vtr ingest src/ > vtr-results.json
+          vcr ingest src/ > vtr-results.json
           
       - name: Verify determinism
         run: |
-          vtr ingest src/ > vtr-results2.json
+          vcr ingest src/ > vtr-results2.json
           diff vtr-results.json vtr-results2.json
           
       - name: Save snapshot
-        run: vtr snapshot save
+        run: vcr snapshot save
 ```
 
 **Why this works**:
@@ -80,18 +80,18 @@ jobs:
 # Ingest critical repositories
 for repo in /repos/auth /repos/payments /repos/core; do
   echo "Analyzing $repo..."
-  vtr ingest "$repo" > "audit-$(basename $repo)-$(date +%Y%m%d).json"
+  vcr ingest "$repo" > "audit-$(basename $repo)-$(date +%Y%m%d).json"
   
   # Save snapshot
-  vtr snapshot save
+  vcr snapshot save
   
   # Verify determinism
-  vtr ingest "$repo" > "/tmp/verify.json"
+  vcr ingest "$repo" > "/tmp/verify.json"
   diff "audit-$(basename $repo)-$(date +%Y%m%d).json" "/tmp/verify.json"
 done
 
 # Run compliance query
-vtr query queries/taint-to-external.json > taint-results.json
+vcr query queries/taint-to-external.json > taint-results.json
 ```
 
 **Cron**:
@@ -122,19 +122,19 @@ vtr query queries/taint-to-external.json > taint-results.json
 
 # Analyze main branch
 git checkout main
-vtr ingest src/ > main-cpg.json
+vcr ingest src/ > main-cpg.json
 MAIN_HASH=$(jq -r '.cpg_hash' main-cpg.json)
 
 # Analyze feature branch
 git checkout feature-branch
-vtr ingest src/ > feature-cpg.json  
+vcr ingest src/ > feature-cpg.json  
 FEATURE_HASH=$(jq -r '.cpg_hash' feature-cpg.json)
 
 # Compare
 if [ "$MAIN_HASH" != "$FEATURE_HASH" ]; then
   echo "Semantic change detected"
   # Run diff query
-  vtr query queries/cpg-diff.json
+  vcr query queries/cpg-diff.json
 fi
 ```
 
@@ -156,14 +156,14 @@ fi
 
 ### Week 1-2: Setup
 
-- Install VTR in target environment
+- Install VCR in target environment
 - Create basic config (`vtr.toml`)
 - Run manual tests
 - Verify determinism locally
 
 ### Week 3-4: Shadow Mode
 
-- Run VTR alongside existing tools
+- Run VCR alongside existing tools
 - Collect outputs, don't act on them
 - Monitor for crashes, hangs, errors
 - Validate hash stability
@@ -193,7 +193,7 @@ Track these metrics:
 
 ```bash
 # Daily check
-- [ ] Did VTR complete successfully?
+- [ ] Did VCR complete successfully?
 - [ ] Were hashes consistent?
 - [ ] Any error logs?
 - [ ] Any manual interventions?
@@ -238,11 +238,11 @@ Track these metrics:
 ## Runbook Template
 
 ```markdown
-# VTR Deployment Runbook
+# VCR Deployment Runbook
 
 ## Normal Operation
 
-1. VTR runs automatically (CI/cron/pre-commit)
+1. VCR runs automatically (CI/cron/pre-commit)
 2. Outputs JSON to configured path
 3. Snapshots saved to snapshot_dir
 4. Hash logged for verification
@@ -255,12 +255,12 @@ Track these metrics:
 - **Escalation**: Review epoch construction
 
 ### Crash
-- **Symptom**: VTR exits with error
+- **Symptom**: VCR exits with error
 - **Action**: Check logs, verify input
 - **Escalation**: Restore from last snapshot
 
 ### Hang/Timeout
-- **Symptom**: VTR doesn't complete
+- **Symptom**: VCR doesn't complete
 - **Action**: Kill process, check for unbounded loop
 - **Escalation**: Review analysis bounds
 
@@ -283,7 +283,7 @@ Track these metrics:
 
 ## Success Definition
 
-**After 3 months**, VTR should:
+**After 3 months**, VCR should:
 
 ✅ Run without manual intervention  
 ✅ Produce stable hashes  
@@ -328,4 +328,4 @@ ONE workflow.
 
 **Observe for months, not weeks.**
 
-Let VTR prove itself through boring reliability, not flashy features.
+Let VCR prove itself through boring reliability, not flashy features.

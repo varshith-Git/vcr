@@ -1,4 +1,4 @@
-# VTR CLI JSON Schemas
+# VCR CLI JSON Schemas
 
 **API Contract - v0.1.0**
 
@@ -8,7 +8,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ## Success Responses
 
-### `vtr ingest`
+### `vcr ingest`
 
 ```json
 {
@@ -27,7 +27,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ---
 
-### `vtr snapshot save`
+### `vcr snapshot save`
 
 ```json
 {
@@ -44,7 +44,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ---
 
-### `vtr snapshot load`
+### `vcr snapshot load`
 
 ```json
 {
@@ -61,7 +61,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ---
 
-### `vtr snapshot verify`
+### `vcr snapshot verify`
 
 ```json
 {
@@ -78,7 +78,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ---
 
-### `vtr query`
+### `vcr query`
 
 ```json
 {
@@ -97,7 +97,7 @@ These schemas are FROZEN. Breaking changes require version bump.
 
 ---
 
-### `vtr explain`
+### `vcr explain`
 
 ```json
 {
