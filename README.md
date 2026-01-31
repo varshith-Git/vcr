@@ -4,7 +4,7 @@
 
 **Deterministic Code Analysis Infrastructure for High-Assurance Environments**
 
-[![CI Status](https://github.com/varshith-Git/vcr/actions/workflows/vtr-analysis.yml/badge.svg)](https://github.com/varshith-Git/vcr/actions)
+[![CI Status](https://github.com/varshith-Git/vcr/actions/workflows/vcr-analysis.yml/badge.svg)](https://github.com/varshith-Git/vcr/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-green)](https://github.com/varshith-Git/vcr/releases/tag/v0.1.0)
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org/)
